@@ -144,7 +144,21 @@ import { tareaService } from '../services/tareaService';
 
 const router = useRouter();
 const route = useRoute();
-const nombreUsuario = ref(localStorage.getItem('usuarioNombre') || 'Usuario');
+// Obtener nombre de usuario del localStorage
+const getUserName = () => {
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      return user.username || user.nombre || 'Usuario';
+    } catch {
+      return 'Usuario';
+    }
+  }
+  return localStorage.getItem('usuarioNombre') || 'Usuario';
+};
+
+const nombreUsuario = ref(getUserName());
 
 // Variables para notificaciones
 const notificaciones = ref([]);
@@ -160,8 +174,8 @@ const snackbarIcon = ref('mdi-alert');
 let intervaloVerificacion = null;
 let notificacionesMostradas = new Set();
 
-// Actualizar nombre de usuario
-nombreUsuario.value = localStorage.getItem('usuarioNombre') || 'Usuario';
+// Función para verificar si hay token
+const getToken = () => localStorage.getItem('jwt_token') || localStorage.getItem('token');
 
 const totalNotificaciones = computed(() => notificaciones.value.length);
 
@@ -197,9 +211,9 @@ const onMenuToggle = (isOpen) => {
 
 // Verificar tareas y generar notificaciones
 const verificarTareas = async () => {
-  const token = localStorage.getItem('token');
+  const token = getToken();
   if (!token) {
-    console.log('No hay token, no se verifican notificaciones');
+    console.log('No hay token (jwt_token), no se verifican notificaciones');
     return;
   }
 
@@ -325,7 +339,7 @@ const formatearFecha = (fecha) => {
 
 // Observar cambios de ruta para recargar notificaciones
 watch(() => route.path, () => {
-  if (localStorage.getItem('token')) {
+  if (getToken()) {
     verificarTareas();
   }
 });
@@ -333,7 +347,7 @@ watch(() => route.path, () => {
 onMounted(() => {
   // Pequeño delay para asegurar que el token esté disponible
   setTimeout(() => {
-    if (localStorage.getItem('token')) {
+    if (getToken()) {
       verificarTareas();
       // Verificar cada 2 minutos
       intervaloVerificacion = setInterval(verificarTareas, 2 * 60 * 1000);
