@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { usuarioService } from '@/services/usuarioService' 
+import { usuarioService } from '@/services/usuarioService'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,11 +32,17 @@ const router = createRouter({
       meta: { requiresAuth: true } // Requiere autenticación
     },
     {
-      path: '/editar-tarea/:id',  
+      path: '/editar-tarea/:id',
       name: 'editar-tarea',
-      component: () => import('@/views/EditTaskView.vue'),  
-      meta: { requiresAuth: true }, 
-      props: true  
+      component: () => import('@/views/EditTaskView.vue'),
+      meta: { requiresAuth: true },
+      props: true
+    },
+    {
+      path: '/estadisticas',
+      name: 'estadisticas',
+      component: () => import('@/views/StatsView.vue'),
+      meta: { requiresAuth: true } // Requiere autenticación
     },
     { path: '/', redirect: '/login' } // Redirigir a login si no hay ruta definida
   ]
