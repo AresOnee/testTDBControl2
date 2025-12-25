@@ -56,10 +56,10 @@
         <v-card class="h-100" elevation="2">
           <v-card-title class="bg-success text-white">
             <v-icon class="mr-2">mdi-map-marker-radius</v-icon>
-            <span class="pregunta-num">P2.</span> Tarea Mas Cercana (Pendiente)
+            <span class="pregunta-num">P2.</span> Tarea Pendiente Mas Cercana
           </v-card-title>
           <v-card-subtitle class="pt-2">
-            <strong>Pregunta 2:</strong> ¿Cual es la tarea mas cercana al usuario (pendiente)?
+            <strong>Pregunta 2:</strong> ¿Cual es la tarea pendiente mas cercana al usuario?
           </v-card-subtitle>
           <v-card-text>
             <v-progress-circular v-if="cargando.tareaCercana" indeterminate size="24"></v-progress-circular>
@@ -155,31 +155,23 @@
         </v-card>
       </v-col>
 
-      <!-- Pregunta 6: Tarea pendiente mas cercana a ubicacion del usuario -->
+      <!-- Pregunta 6: Sector con mas tareas en 5km -->
       <v-col cols="12" md="6">
         <v-card class="h-100" elevation="2">
-          <v-card-title class="bg-orange text-white">
-            <v-icon class="mr-2">mdi-target</v-icon>
-            <span class="pregunta-num">P6.</span> Tarea Pendiente Mas Cercana
+          <v-card-title class="bg-warning text-white">
+            <v-icon class="mr-2">mdi-radius</v-icon>
+            <span class="pregunta-num">P6.</span> Sector Top (Radio 5 km)
           </v-card-title>
           <v-card-subtitle class="pt-2">
-            <strong>Pregunta 6:</strong> ¿Tarea pendiente mas cercana al usuario?
+            <strong>Pregunta 6:</strong> ¿Sector con mas tareas completadas en radio de 5km?
           </v-card-subtitle>
           <v-card-text>
-            <v-progress-circular v-if="cargando.tareaPendienteCercana" indeterminate size="24"></v-progress-circular>
-            <div v-else-if="tareaPendienteCercana">
-              <v-list-item class="px-0">
-                <v-list-item-title class="font-weight-bold">{{ tareaPendienteCercana.titulo }}</v-list-item-title>
-                <v-list-item-subtitle>{{ tareaPendienteCercana.descripcion }}</v-list-item-subtitle>
-                <template v-slot:append>
-                  <v-chip color="orange" size="small">{{ tareaPendienteCercana.estado }}</v-chip>
-                </template>
-              </v-list-item>
-              <div class="text-caption text-grey mt-2">
-                Sector: {{ tareaPendienteCercana.sector?.nombre || 'N/A' }}
-              </div>
+            <v-progress-circular v-if="cargando.sector5km" indeterminate size="24"></v-progress-circular>
+            <div v-else-if="sector5km && sector5km !== 'No encontrado'" class="text-center py-4">
+              <v-icon size="48" color="warning" class="mb-2">mdi-map-marker-check</v-icon>
+              <div class="text-h6">{{ sector5km }}</div>
             </div>
-            <div v-else class="text-grey text-center py-4">No hay tareas pendientes cercanas</div>
+            <div v-else class="text-grey text-center py-4">No hay sectores con tareas en este radio</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -221,36 +213,15 @@
         </v-card>
       </v-col>
 
-      <!-- Pregunta 8: Sector con mas tareas en 5km -->
-      <v-col cols="12" md="6">
-        <v-card class="h-100" elevation="2">
-          <v-card-title class="bg-warning text-white">
-            <v-icon class="mr-2">mdi-radius</v-icon>
-            <span class="pregunta-num">P8.</span> Sector Top (Radio 5 km)
-          </v-card-title>
-          <v-card-subtitle class="pt-2">
-            <strong>Pregunta 8:</strong> ¿Sector con mas tareas completadas en radio de 5km?
-          </v-card-subtitle>
-          <v-card-text>
-            <v-progress-circular v-if="cargando.sector5km" indeterminate size="24"></v-progress-circular>
-            <div v-else-if="sector5km && sector5km !== 'No encontrado'" class="text-center py-4">
-              <v-icon size="48" color="warning" class="mb-2">mdi-map-marker-check</v-icon>
-              <div class="text-h6">{{ sector5km }}</div>
-            </div>
-            <div v-else class="text-grey text-center py-4">No hay sectores con tareas en este radio</div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <!-- Pregunta 9: Promedio de Distancia Global -->
+      <!-- Pregunta 8: Promedio de Distancia Global -->
       <v-col cols="12" md="6">
         <v-card class="h-100" elevation="2">
           <v-card-title class="bg-indigo text-white">
             <v-icon class="mr-2">mdi-earth</v-icon>
-            <span class="pregunta-num">P9.</span> Promedio Distancia (Global)
+            <span class="pregunta-num">P8.</span> Promedio Distancia (Global)
           </v-card-title>
           <v-card-subtitle class="pt-2">
-            <strong>Pregunta 9:</strong> ¿Promedio de distancia entre tareas completadas y punto del usuario?
+            <strong>Pregunta 8:</strong> ¿Promedio de distancia entre tareas completadas y punto del usuario?
           </v-card-subtitle>
           <v-card-text>
             <v-progress-circular v-if="cargando.promedioDistanciaGlobal" indeterminate size="24"></v-progress-circular>
@@ -278,7 +249,6 @@ const cargando = ref({
   sector5km: false,
   promedioDistancia: false,
   concentracion: false,
-  tareaPendienteCercana: false,
   completadasGlobal: false,
   promedioDistanciaGlobal: false
 });
@@ -293,7 +263,6 @@ const sector2km = ref(null);
 const sector5km = ref(null);
 const promedioDistancia = ref(0);
 const concentracionPendientes = ref([]);
-const tareaPendienteCercana = ref(null);
 const completadasPorUsuarioSector = ref([]);
 const promedioDistanciaGlobal = ref(0);
 
@@ -332,8 +301,7 @@ const cargarEstadisticas = async () => {
       cargarTareaCercana(),
       cargarSector2km(),
       cargarSector5km(),
-      cargarPromedioDistancia(),
-      cargarTareaPendienteCercana()
+      cargarPromedioDistancia()
     ]);
   }
 };
@@ -412,18 +380,18 @@ const cargarConcentracionPendientes = async () => {
   }
 };
 
-// Pregunta 6: Tarea pendiente mas cercana a ubicacion del usuario
-const cargarTareaPendienteCercana = async () => {
+// Pregunta 6: Sector con mas tareas en 5km
+const cargarSector5km = async () => {
   if (!usuarioId.value) return;
-  cargando.value.tareaPendienteCercana = true;
+  cargando.value.sector5km = true;
   try {
-    const data = await tareaService.tareaPendienteMasCercanaAUsuario(usuarioId.value);
-    tareaPendienteCercana.value = data;
+    const data = await tareaService.sectorTopRadio(usuarioId.value, 5);
+    sector5km.value = data;
   } catch (error) {
-    console.error('Error cargando tarea pendiente cercana:', error);
-    tareaPendienteCercana.value = null;
+    console.error('Error cargando sector 5km:', error);
+    sector5km.value = null;
   } finally {
-    cargando.value.tareaPendienteCercana = false;
+    cargando.value.sector5km = false;
   }
 };
 
@@ -441,22 +409,7 @@ const cargarCompletadasGlobal = async () => {
   }
 };
 
-// Pregunta 8: Sector con mas tareas en 5km
-const cargarSector5km = async () => {
-  if (!usuarioId.value) return;
-  cargando.value.sector5km = true;
-  try {
-    const data = await tareaService.sectorTopRadio(usuarioId.value, 5);
-    sector5km.value = data;
-  } catch (error) {
-    console.error('Error cargando sector 5km:', error);
-    sector5km.value = null;
-  } finally {
-    cargando.value.sector5km = false;
-  }
-};
-
-// Pregunta 9: Promedio de distancia global
+// Pregunta 8: Promedio de distancia global
 const cargarPromedioDistanciaGlobal = async () => {
   cargando.value.promedioDistanciaGlobal = true;
   try {
@@ -489,10 +442,6 @@ onMounted(() => {
 
 .bg-teal {
   background-color: #009688 !important;
-}
-
-.bg-orange {
-  background-color: #FF9800 !important;
 }
 
 .bg-indigo {
