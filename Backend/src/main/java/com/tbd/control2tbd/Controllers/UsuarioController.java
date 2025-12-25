@@ -3,6 +3,7 @@ package com.tbd.control2tbd.Controllers;
 import com.tbd.control2tbd.DTOs.AuthResponse;
 import com.tbd.control2tbd.DTOs.UsuarioRegistroDTO;
 import com.tbd.control2tbd.Entities.Usuario;
+import com.tbd.control2tbd.Repositories.UsuarioRepository;
 import com.tbd.control2tbd.Services.UsuarioService;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -19,6 +20,10 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     @PostMapping("/registro")
@@ -34,8 +39,11 @@ public class UsuarioController {
         // Llamamos al servicio para registrar el usuario y generar el token
         String token = usuarioService.registrarUsuario(nuevoUsuario);
 
-        // Devolvemos el token
-        return ResponseEntity.ok(new AuthResponse(dto.getUsername(), token));
+        // Obtener el usuario guardado para tener el ID
+        Usuario usuarioGuardado = usuarioRepository.findByUsername(dto.getUsername());
+
+        // Devolvemos el token con el ID
+        return ResponseEntity.ok(new AuthResponse(usuarioGuardado.getId(), dto.getUsername(), token));
     }
 
     @PostMapping("/login")
@@ -44,8 +52,10 @@ public class UsuarioController {
         String token = usuarioService.login(dto.getUsername(), dto.getPassword());
 
         if (token != null) {
-            // Si el login es exitoso, devolvemos el token
-            return ResponseEntity.ok(new AuthResponse(dto.getUsername(), token));
+            // Obtener el usuario para tener el ID
+            Usuario usuario = usuarioRepository.findByUsername(dto.getUsername());
+            // Si el login es exitoso, devolvemos el token con el ID
+            return ResponseEntity.ok(new AuthResponse(usuario.getId(), dto.getUsername(), token));
         }
         // Si el login falla, devolvemos un error 401 (Unauthorized)
         return ResponseEntity.status(401).build();
