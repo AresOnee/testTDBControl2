@@ -19,6 +19,7 @@
         :close-on-content-click="false"
         location="bottom end"
         max-width="400"
+        @update:model-value="onMenuToggle"
       >
         <template v-slot:activator="{ props }">
           <v-btn
@@ -50,7 +51,13 @@
 
           <v-divider></v-divider>
 
-          <v-list v-if="notificaciones.length > 0" density="compact" max-height="300" class="overflow-y-auto">
+          <!-- Loading state -->
+          <v-card-text v-if="cargandoNotificaciones" class="text-center py-4">
+            <v-progress-circular indeterminate color="primary" size="24"></v-progress-circular>
+            <div class="mt-2">Verificando tareas...</div>
+          </v-card-text>
+
+          <v-list v-else-if="notificaciones.length > 0" density="compact" max-height="300" class="overflow-y-auto">
             <v-list-item
               v-for="notif in notificaciones"
               :key="notif.id"
@@ -143,6 +150,7 @@ const nombreUsuario = ref(localStorage.getItem('usuarioNombre') || 'Usuario');
 const notificaciones = ref([]);
 const notificacionesCerradas = ref(new Set());
 const mostrarNotificaciones = ref(false);
+const cargandoNotificaciones = ref(false);
 const mostrarSnackbar = ref(false);
 const snackbarTitulo = ref('');
 const snackbarMensaje = ref('');
@@ -173,68 +181,97 @@ const irATareas = () => {
 const logout = () => {
   usuarioService.logout();
   nombreUsuario.value = '';
+  notificaciones.value = [];
   if (intervaloVerificacion) {
     clearInterval(intervaloVerificacion);
   }
   router.replace('/login');
 };
 
+// Cuando se abre/cierra el menú de notificaciones
+const onMenuToggle = (isOpen) => {
+  if (isOpen) {
+    verificarTareas();
+  }
+};
+
 // Verificar tareas y generar notificaciones
 const verificarTareas = async () => {
   const token = localStorage.getItem('token');
-  if (!token) return;
+  if (!token) {
+    console.log('No hay token, no se verifican notificaciones');
+    return;
+  }
+
+  cargandoNotificaciones.value = true;
 
   try {
     const tareas = await tareaService.getTareasByUsuario();
+    console.log('Tareas obtenidas para notificaciones:', tareas);
+
     const ahora = new Date();
     const nuevasNotificaciones = [];
 
-    tareas.forEach(tarea => {
-      if (tarea.estado !== 'PENDIENTE' || !tarea.fechaVencimiento) return;
-      if (notificacionesCerradas.value.has(tarea.idTarea)) return;
+    if (Array.isArray(tareas)) {
+      tareas.forEach(tarea => {
+        // Solo verificar tareas pendientes con fecha de vencimiento
+        if (tarea.estado !== 'PENDIENTE' || !tarea.fechaVencimiento) return;
 
-      const fechaVencimiento = new Date(tarea.fechaVencimiento);
-      const diferenciaHoras = (fechaVencimiento - ahora) / (1000 * 60 * 60);
+        // Usar idTarea o id según lo que venga del backend
+        const tareaId = tarea.idTarea || tarea.id;
 
-      let notif = null;
+        // Si ya se cerró esta notificación, no mostrarla
+        if (notificacionesCerradas.value.has(tareaId)) return;
 
-      if (diferenciaHoras < 0) {
-        notif = {
-          id: tarea.idTarea,
-          titulo: tarea.titulo,
-          mensaje: `Tarea vencida desde ${formatearFecha(tarea.fechaVencimiento)}`,
-          tipo: 'error'
-        };
-      } else if (diferenciaHoras <= 24) {
-        notif = {
-          id: tarea.idTarea,
-          titulo: tarea.titulo,
-          mensaje: `Vence en menos de 24 horas`,
-          tipo: 'warning'
-        };
-      } else if (diferenciaHoras <= 48) {
-        notif = {
-          id: tarea.idTarea,
-          titulo: tarea.titulo,
-          mensaje: `Vence el ${formatearFecha(tarea.fechaVencimiento)}`,
-          tipo: 'info'
-        };
-      }
+        const fechaVencimiento = new Date(tarea.fechaVencimiento);
+        const diferenciaHoras = (fechaVencimiento - ahora) / (1000 * 60 * 60);
 
-      if (notif) {
-        nuevasNotificaciones.push(notif);
+        let notif = null;
 
-        // Mostrar snackbar solo para nuevas notificaciones urgentes (primera vez)
-        if (!notificacionesMostradas.has(notif.id) && (notif.tipo === 'error' || notif.tipo === 'warning')) {
-          mostrarSnackbarNotificacion(notif);
-          notificacionesMostradas.add(notif.id);
+        if (diferenciaHoras < 0) {
+          // Tarea vencida
+          notif = {
+            id: tareaId,
+            titulo: tarea.titulo,
+            mensaje: `Tarea vencida desde ${formatearFecha(tarea.fechaVencimiento)}`,
+            tipo: 'error'
+          };
+        } else if (diferenciaHoras <= 24) {
+          // Vence en menos de 24 horas
+          notif = {
+            id: tareaId,
+            titulo: tarea.titulo,
+            mensaje: `Vence en menos de 24 horas`,
+            tipo: 'warning'
+          };
+        } else if (diferenciaHoras <= 48) {
+          // Vence en menos de 48 horas
+          notif = {
+            id: tareaId,
+            titulo: tarea.titulo,
+            mensaje: `Vence el ${formatearFecha(tarea.fechaVencimiento)}`,
+            tipo: 'info'
+          };
         }
-      }
-    });
 
+        if (notif) {
+          nuevasNotificaciones.push(notif);
+
+          // Mostrar snackbar solo para nuevas notificaciones urgentes (primera vez)
+          if (!notificacionesMostradas.has(notif.id) && (notif.tipo === 'error' || notif.tipo === 'warning')) {
+            mostrarSnackbarNotificacion(notif);
+            notificacionesMostradas.add(notif.id);
+          }
+        }
+      });
+    }
+
+    console.log('Notificaciones generadas:', nuevasNotificaciones);
     notificaciones.value = nuevasNotificaciones;
   } catch (error) {
     console.error('Error verificando notificaciones:', error);
+  } finally {
+    cargandoNotificaciones.value = false;
   }
 };
 
@@ -294,11 +331,14 @@ watch(() => route.path, () => {
 });
 
 onMounted(() => {
-  if (localStorage.getItem('token')) {
-    verificarTareas();
-    // Verificar cada 5 minutos
-    intervaloVerificacion = setInterval(verificarTareas, 5 * 60 * 1000);
-  }
+  // Pequeño delay para asegurar que el token esté disponible
+  setTimeout(() => {
+    if (localStorage.getItem('token')) {
+      verificarTareas();
+      // Verificar cada 2 minutos
+      intervaloVerificacion = setInterval(verificarTareas, 2 * 60 * 1000);
+    }
+  }, 500);
 });
 
 onUnmounted(() => {
