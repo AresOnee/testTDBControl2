@@ -1,5 +1,6 @@
 package com.tbd.control2tbd.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.locationtech.jts.geom.Point;
@@ -18,6 +19,7 @@ public class Sector {
 
     private String tipo;
 
+    @JsonIgnore
     @Column(columnDefinition = "geometry(Point, 4326)", nullable = false)
     private Point ubicacion;
 }
