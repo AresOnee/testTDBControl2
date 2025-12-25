@@ -52,6 +52,11 @@ export const tareaService = {
     return response.data
   },
 
+  async promedioDistanciaGlobal() {
+    const response = await api.get('/api/tareas/promedio-distancia-global')
+    return response.data
+  },
+
   async editar(id, tareaData) {
   const response = await api.put(`/api/tareas/${id}/editar`, tareaData);
   return response.data;
