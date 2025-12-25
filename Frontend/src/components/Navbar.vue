@@ -144,21 +144,35 @@ import { tareaService } from '../services/tareaService';
 
 const router = useRouter();
 const route = useRoute();
+
 // Obtener nombre de usuario del localStorage
 const getUserName = () => {
+  // Primero intentar usuarioNombre (guardado por LoginView)
+  const nombreDirecto = localStorage.getItem('usuarioNombre');
+  if (nombreDirecto && nombreDirecto !== 'Usuario') {
+    return nombreDirecto;
+  }
+
+  // Luego intentar el objeto user (guardado por usuarioService)
   const userStr = localStorage.getItem('user');
   if (userStr) {
     try {
       const user = JSON.parse(userStr);
       return user.username || user.nombre || 'Usuario';
     } catch {
-      return 'Usuario';
+      // Si falla el parse, ignorar
     }
   }
-  return localStorage.getItem('usuarioNombre') || 'Usuario';
+
+  return 'Usuario';
 };
 
 const nombreUsuario = ref(getUserName());
+
+// Actualizar nombre de usuario cuando cambia la ruta (por si acaba de hacer login)
+watch(() => route.path, () => {
+  nombreUsuario.value = getUserName();
+});
 
 // Variables para notificaciones
 const notificaciones = ref([]);
