@@ -173,13 +173,18 @@ public class TareaService {
         return tareaRepository.contarTareasCompletadasPorUsuarioYSector();
     }
 
-    // 9. Promedio de distancia de tareas completadas
+    // 9. Promedio de distancia de tareas completadas (por usuario)
     public Double promedioDistancia(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElse(null);
         if (usuario != null) {
             return tareaRepository.calcularPromedioDistanciaTareas(usuario.getUbicacion(), usuarioId);
         }
         return 0.0;
+    }
+
+    // 10. Promedio de distancia global entre tareas completadas y punto del usuario
+    public Double promedioDistanciaGlobal() {
+        return tareaRepository.calcularPromedioDistanciaTareasCompletadas();
     }
 
 }

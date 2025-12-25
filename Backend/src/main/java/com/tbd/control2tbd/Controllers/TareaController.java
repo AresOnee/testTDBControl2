@@ -113,6 +113,12 @@ public class TareaController {
         return tareaService.contarTareasCompletadasPorUsuarioYSector();
     }
 
+    // 8. ¿Cuál es el promedio de distancia entre las tareas completadas y el punto registrado del usuario? (Global)
+    @GetMapping("/promedio-distancia-global")
+    public ResponseEntity<Double> promedioDistanciaGlobal() {
+        return ResponseEntity.ok(tareaService.promedioDistanciaGlobal());
+    }
+
     @GetMapping("/usuario")
     public List<ListTareasDTO> getTareasByUsuario(Authentication authentication) {
         String username = authentication.getName();
