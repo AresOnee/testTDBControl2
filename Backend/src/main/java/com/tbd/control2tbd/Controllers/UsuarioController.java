@@ -5,6 +5,7 @@ import com.tbd.control2tbd.DTOs.UsuarioRegistroDTO;
 import com.tbd.control2tbd.Entities.Usuario;
 import com.tbd.control2tbd.Repositories.UsuarioRepository;
 import com.tbd.control2tbd.Services.UsuarioService;
+import jakarta.validation.Valid;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -27,7 +28,7 @@ public class UsuarioController {
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     @PostMapping("/registro")
-    public ResponseEntity<?> registrar(@RequestBody UsuarioRegistroDTO dto) {
+    public ResponseEntity<?> registrar(@Valid @RequestBody UsuarioRegistroDTO dto) {
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername(dto.getUsername());
         nuevoUsuario.setPassword(dto.getPassword());
@@ -47,7 +48,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UsuarioRegistroDTO dto) {
+    public ResponseEntity<?> login(@Valid @RequestBody UsuarioRegistroDTO dto) {
         // Llamamos al servicio para intentar autenticar y obtener el token
         String token = usuarioService.login(dto.getUsername(), dto.getPassword());
 

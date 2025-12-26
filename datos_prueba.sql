@@ -30,16 +30,17 @@ SELECT setval('sectores_id_seq', (SELECT MAX(id) FROM sectores));
 -- =====================================================
 -- 2. INSERTAR USUARIOS (con ubicaciones cercanas a sectores)
 -- =====================================================
--- NOTA: Este sistema NO usa BCrypt, las contrasenas son texto plano
+-- NOTA: Las contrasenas estan hasheadas con BCrypt
+-- Todas las contrasenas son: password123
 
 INSERT INTO usuarios (id, username, password, ubicacion) VALUES
-(1, 'juan', 'password123',
+(1, 'juan', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgBemyTlKDNLKrP1jmjYw5FT9q9a',
    ST_SetSRID(ST_MakePoint(-70.6450, -33.4380), 4326)),
-(2, 'maria', 'password123',
+(2, 'maria', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgBemyTlKDNLKrP1jmjYw5FT9q9a',
    ST_SetSRID(ST_MakePoint(-70.6100, -33.4300), 4326)),
-(3, 'pedro', 'password123',
+(3, 'pedro', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgBemyTlKDNLKrP1jmjYw5FT9q9a',
    ST_SetSRID(ST_MakePoint(-70.6300, -33.4450), 4326)),
-(4, 'ana', 'password123',
+(4, 'ana', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgBemyTlKDNLKrP1jmjYw5FT9q9a',
    ST_SetSRID(ST_MakePoint(-70.5900, -33.4200), 4326))
 ON CONFLICT (id) DO UPDATE SET
   username = EXCLUDED.username,
