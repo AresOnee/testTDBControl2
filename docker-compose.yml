@@ -1,0 +1,98 @@
+# =====================================================
+# Docker Compose - Control 2 TBD
+# Sistema de Gestión de Tareas con Geolocalización
+# =====================================================
+
+version: '3.8'
+
+services:
+  # =====================================================
+  # Base de Datos PostgreSQL con PostGIS
+  # =====================================================
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: control2tbd_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: control2tbd
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./datos_prueba.sql:/docker-entrypoint-initdb.d/02-datos_prueba.sql:ro
+    networks:
+      - control2tbd_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d control2tbd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =====================================================
+  # Backend Spring Boot
+  # =====================================================
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: control2tbd_backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DATABASE_URL: jdbc:postgresql://postgres:5432/control2tbd
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - control2tbd_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # =====================================================
+  # Frontend Vue.js con Nginx
+  # =====================================================
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8080
+    container_name: control2tbd_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - control2tbd_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+# =====================================================
+# Redes
+# =====================================================
+networks:
+  control2tbd_network:
+    driver: bridge
+
+# =====================================================
+# Volúmenes
+# =====================================================
+volumes:
+  postgres_data:
+    driver: local
