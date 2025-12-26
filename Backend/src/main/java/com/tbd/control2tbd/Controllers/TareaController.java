@@ -5,6 +5,7 @@ import com.tbd.control2tbd.DTOs.TareaDTO;
 import com.tbd.control2tbd.Entities.Tarea;
 import com.tbd.control2tbd.Entities.Usuario;
 import com.tbd.control2tbd.Services.TareaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class TareaController {
 
     // Crear Tarea
     @PostMapping
-    public ResponseEntity<Tarea> crearTarea(@RequestBody TareaDTO tareaDTO) {
+    public ResponseEntity<Tarea> crearTarea(@Valid @RequestBody TareaDTO tareaDTO) {
         try {
             Tarea tarea = tareaService.crearTarea(tareaDTO); // Llamada al servicio
             return ResponseEntity.status(HttpStatus.CREATED).body(tarea);
@@ -45,7 +46,7 @@ public class TareaController {
     }
 
     @PutMapping("/{id}/editar")
-    public ResponseEntity<Tarea> editarTarea(@PathVariable Long id, @RequestBody TareaDTO tareaDTO) {
+    public ResponseEntity<Tarea> editarTarea(@PathVariable Long id, @Valid @RequestBody TareaDTO tareaDTO) {
         try {
             // Llamamos al servicio para editar la tarea
             Tarea tareaActualizada = tareaService.editarTarea(id, tareaDTO);
