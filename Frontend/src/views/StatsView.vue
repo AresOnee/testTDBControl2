@@ -177,8 +177,8 @@
       </v-col>
 
       <!-- Pregunta 8: Tareas Completadas por Usuario y Sector (Global) -->
-      <v-col cols="12">
-        <v-card elevation="2">
+      <v-col cols="12" md="6">
+        <v-card class="h-100" elevation="2">
           <v-card-title class="bg-teal text-white">
             <v-icon class="mr-2">mdi-account-group</v-icon>
             <span class="pregunta-num">P8.</span> Tareas Completadas por Usuario y Sector
