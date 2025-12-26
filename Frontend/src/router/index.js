@@ -20,6 +20,12 @@ const router = createRouter({
 
     // Rutas protegidas (requieren autenticación)
     {
+      path: '/inicio',
+      name: 'inicio',
+      component: () => import('@/views/HomeView.vue'),
+      meta: { requiresAuth: true } // Requiere autenticación
+    },
+    {
       path: '/tareas',
       name: 'tareas',
       component: () => import('@/views/TaskListView.vue'),
@@ -57,7 +63,7 @@ router.beforeEach((to, from, next) => {
     next({ name: 'login' }) // Redirigir al login si no está autenticado
   }
   else if (to.meta.requiresGuest && isAuthenticated) {
-    next({ name: 'tareas' }) // Redirigir a tareas si ya está autenticado
+    next({ name: 'inicio' }) // Redirigir a inicio si ya está autenticado
   } else {
     next() // Permitir acceso a la ruta
   }

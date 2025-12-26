@@ -57,9 +57,9 @@ const login = async () => {
     mensaje.value = "¡Bienvenido " + (usuario.username || 'Usuario') + "!";
     error.value = false;
 
-    // Redirigir a la página de tareas
+    // Redirigir a la página de inicio
     setTimeout(() => {
-      router.replace('/tareas'); // Usamos replace para evitar que el usuario regrese al login
+      router.replace('/inicio'); // Usamos replace para evitar que el usuario regrese al login
     }, 1000);
 
   } catch (e) {

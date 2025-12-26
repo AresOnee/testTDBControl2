@@ -194,7 +194,7 @@ const getToken = () => localStorage.getItem('jwt_token') || localStorage.getItem
 const totalNotificaciones = computed(() => notificaciones.value.length);
 
 // Navegación
-const goHome = () => router.push('/tareas');
+const goHome = () => router.push('/inicio');
 const goTasks = () => router.push('/tareas');
 const goCreateTask = () => router.push('/crear-tarea');
 const goStats = () => router.push('/estadisticas');
