@@ -155,15 +155,15 @@
         </v-card>
       </v-col>
 
-      <!-- Pregunta 6: Sector con mas tareas en 5km -->
+      <!-- Pregunta 7: Sector con mas tareas en 5km -->
       <v-col cols="12" md="6">
         <v-card class="h-100" elevation="2">
           <v-card-title class="bg-warning text-white">
             <v-icon class="mr-2">mdi-radius</v-icon>
-            <span class="pregunta-num">P6.</span> Sector Top (Radio 5 km)
+            <span class="pregunta-num">P7.</span> Sector Top (Radio 5 km)
           </v-card-title>
           <v-card-subtitle class="pt-2">
-            <strong>Pregunta 6:</strong> ¿Sector con mas tareas completadas en radio de 5km?
+            <strong>Pregunta 7:</strong> ¿Sector con mas tareas completadas en radio de 5km?
           </v-card-subtitle>
           <v-card-text>
             <v-progress-circular v-if="cargando.sector5km" indeterminate size="24"></v-progress-circular>
@@ -176,15 +176,15 @@
         </v-card>
       </v-col>
 
-      <!-- Pregunta 7: Tareas Completadas por Usuario y Sector (Global) -->
+      <!-- Pregunta 8: Tareas Completadas por Usuario y Sector (Global) -->
       <v-col cols="12">
         <v-card elevation="2">
           <v-card-title class="bg-teal text-white">
             <v-icon class="mr-2">mdi-account-group</v-icon>
-            <span class="pregunta-num">P7.</span> Tareas Completadas por Usuario y Sector
+            <span class="pregunta-num">P8.</span> Tareas Completadas por Usuario y Sector
           </v-card-title>
           <v-card-subtitle class="pt-2">
-            <strong>Pregunta 7:</strong> ¿Cuantas tareas ha realizado cada usuario por sector?
+            <strong>Pregunta 8:</strong> ¿Cuantas tareas ha realizado cada usuario por sector?
           </v-card-subtitle>
           <v-card-text>
             <v-progress-circular v-if="cargando.completadasGlobal" indeterminate size="24"></v-progress-circular>
@@ -213,15 +213,15 @@
         </v-card>
       </v-col>
 
-      <!-- Pregunta 8: Promedio de Distancia Global -->
+      <!-- Pregunta 9: Promedio de Distancia Global -->
       <v-col cols="12" md="6">
         <v-card class="h-100" elevation="2">
           <v-card-title class="bg-indigo text-white">
             <v-icon class="mr-2">mdi-earth</v-icon>
-            <span class="pregunta-num">P8.</span> Promedio Distancia (Global)
+            <span class="pregunta-num">P9.</span> Promedio Distancia (Global)
           </v-card-title>
           <v-card-subtitle class="pt-2">
-            <strong>Pregunta 8:</strong> ¿Promedio de distancia entre tareas completadas y punto del usuario?
+            <strong>Pregunta 9:</strong> ¿Promedio de distancia entre tareas completadas y punto del usuario?
           </v-card-subtitle>
           <v-card-text>
             <v-progress-circular v-if="cargando.promedioDistanciaGlobal" indeterminate size="24"></v-progress-circular>
@@ -380,7 +380,7 @@ const cargarConcentracionPendientes = async () => {
   }
 };
 
-// Pregunta 6: Sector con mas tareas en 5km
+// Pregunta 7: Sector con mas tareas en 5km
 const cargarSector5km = async () => {
   if (!usuarioId.value) return;
   cargando.value.sector5km = true;
@@ -395,7 +395,7 @@ const cargarSector5km = async () => {
   }
 };
 
-// Pregunta 7: Tareas completadas por usuario y sector (global)
+// Pregunta 8: Tareas completadas por usuario y sector (global)
 const cargarCompletadasGlobal = async () => {
   cargando.value.completadasGlobal = true;
   try {
@@ -409,7 +409,7 @@ const cargarCompletadasGlobal = async () => {
   }
 };
 
-// Pregunta 8: Promedio de distancia global
+// Pregunta 9: Promedio de distancia global
 const cargarPromedioDistanciaGlobal = async () => {
   cargando.value.promedioDistanciaGlobal = true;
   try {
